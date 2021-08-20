@@ -24,7 +24,7 @@ class CartItemController extends Controller
             'quantity' => 'required|integer'
         ]);
         $cart = Cart::firstOrCreate([
-            'user_id' => 1//Auth::id()
+            'user_id' => Auth::id()
         ]);
         $item = $cart->items()->updateOrCreate(
             ['good_id' => $validated['item_id'], 'cart_id' => $cart->id],

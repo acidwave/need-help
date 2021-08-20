@@ -38,9 +38,8 @@ class OrderController extends Controller
             'items.*.cost' => 'required|numeric',
             'items.*.quantity' => 'required|integer'
         ]);
-        var_dump($validated);
         $order = Order::create([
-            'user_id' => 1, //Auth::id(),
+            'user_id' => Auth::id(),
             'status_id' => Status::where('slug', 'new')->first()->id,
         ]);
         foreach ($validated['items'] as $value) {
