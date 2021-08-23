@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StatusRequest;
 use App\Models\Status;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -23,16 +24,12 @@ class StatusController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StatusRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StatusRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|unique:statuses,title'
-        ]);
-        $validated['slug'] = Str::slug($validated['title']);
-        $status = Status::create($validated);
+        $status = Status::create($request->validated());
         return new StatusResource($status);
     }
 
@@ -50,17 +47,13 @@ class StatusController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StatusRequest  $request
      * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Status $status)
+    public function update(StatusRequest $request, Status $status)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', Rule::unique('statuses')->ignore($status)]
-        ]);
-        $validated['slug'] = Str::slug($validated['title']);
-        $status->update($validated);
+        $status->update($request->validated());
         return new StatusResource($status);
     }
 

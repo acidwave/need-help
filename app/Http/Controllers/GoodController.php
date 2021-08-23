@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GoodRequest;
 use App\Models\Good;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Resources\GoodResource;
 
 class GoodController extends Controller
@@ -22,20 +22,12 @@ class GoodController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\GoodRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(GoodRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|min:3|string',
-            'cost' => 'required|numeric',
-        ]);
-        $good = new Good();
-        $good->title = $validated['title'];
-        $good->slug = Str::slug($validated['title']);
-        $good->cost = $validated['cost'];
-        $good->save();
+        $good = Good::create($request->validated());
         return new GoodResource($good);
     }
 
@@ -53,20 +45,13 @@ class GoodController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\GoodRequest  $request
      * @param  \App\Models\Good  $good
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Good $good)
+    public function update(GoodRequest $request, Good $good)
     {
-        $validated = $request->validate([
-            'title' => 'required|min:3|string',
-            'cost' => 'required|numeric',
-        ]);
-        $good->title = $validated['title'];
-        $good->slug = Str::slug($validated['title']);
-        $good->cost = $validated['cost'];
-        $good->save();
+        $good->update($request->validated());
         return new GoodResource($good);
     }
 

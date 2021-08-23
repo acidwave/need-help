@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderStoreRequest;
+use App\Http\Requests\OrderUpdateRequest;
 use App\Models\Order;
 use App\Models\Status;
 use App\Models\CartItem;
@@ -28,16 +30,12 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\OrderStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(OrderStoreRequest $request)
     {
-        $validated = $request->validate([
-            'items.*.item_id' => 'required|exists:cart_items,id',
-            'items.*.cost' => 'required|numeric',
-            'items.*.quantity' => 'required|integer'
-        ]);
+        $validated = $request->validated();
         $order = Order::create([
             'user_id' => Auth::id(),
             'status_id' => Status::where('slug', 'new')->first()->id,
@@ -71,16 +69,14 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\OrderUpdateRequest  $request
      * @param  \App\Models\order  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, order $order)
+    public function update(OrderUpdateRequest $request, order $order)
     {
-        $validated = $request->validate([
-            'status_id' => 'required|exists:statuses,id'
-        ]);
-        $order->status_id = $validated['status_id'];
+        $validated = $request->validated();
+        $order->update($validated['status_id']);
         return new OrderResource($order);
     }
 
@@ -92,7 +88,7 @@ class OrderController extends Controller
      */
     public function destroy(order $order)
     {
-        if (!Auth::user()->is_admin || Auth::id() != $order->user_id) {
+        if (!Auth::user()->is_admin || Auth::id() != $order->user_id || (Auth::id() == $order->user_id && $order->status->slug != 'new')) {
             abort(403);
         }
         $order->delete();

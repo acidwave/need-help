@@ -19,14 +19,11 @@ class CartItemController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'item_id' =>'required|exists:goods,id',
-            'quantity' => 'required|integer'
-        ]);
+        $validated = $request->validated();
         $cart = Cart::firstOrCreate([
             'user_id' => Auth::id()
         ]);
-        $item = $cart->items()->updateOrCreate(
+        $cart->items()->updateOrCreate(
             ['good_id' => $validated['item_id'], 'cart_id' => $cart->id],
             ['quantity' => $validated['quantity']
         ]
@@ -43,6 +40,9 @@ class CartItemController extends Controller
      */
     public function destroy(CartItem  $cart_item)
     {
+        if (!Auth::user()->is_admin || Auth::id() != $cart_item->cart->user_id) {
+            abort(403);
+        }
         $cart_item->delete();
         return response()->json(['status' => ' success']);
     }
